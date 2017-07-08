@@ -22,28 +22,35 @@
 #include "stringops.h"
 #include "gopt.h"
 
+/* options are -h; --help, -n; --new and -a; --add */
 
 options_t process_options(int argc, char **argv)
 {
 	synopsis =
   "\tSYNOPSIS\n"
-  "\tprogname whatever \n\n"
+  "\thtmake, generates and adds to makefile for markdown to make html\n\n"
+  "\t -n, --new html_filename\n"
+  "\t -a, --add target_name1, ... target_nameN\n"
   ;
 	helptext =
   "\tOPTIONS\n"
   "\t-h, --help\n\n"
   "\tOutputs this help message and then quits.\n"
-  "\t-1, --one\n"
-  "\tOption one does whatever.\n\n"
+  "\t-n, --new target_name (usually index)\n"
+  "\tCreates a new makefile to make target_name.\n"
+  "\tError if makefile exists.\n"
+  "\t-a, --add target_name\n"
+  "\tAdds addtional target_name to makefile.\n"
+  "\tError if makefile does not exist.\n"
+  "\tRepeat use of this option for each additional target_name.\n\n"
   ;
 
-	optstring = ":h1";	// initialise
+	optstring = ":hn:a:";	// initialise
 
 	/* declare and set defaults for local variables. */
 
 	/* set up defaults for opt vars. */
 	options_t opts = {0};	// assumes defaults all 0/NULL
-	// initialise non-zero defaults below
 
 	int c;
 
@@ -52,7 +59,8 @@ options_t process_options(int argc, char **argv)
 		int option_index = 0;
 		static struct option long_options[] = {
 		{"help",		0,	0,	'h' },
-		{"one",		1,	0,	'1' },
+		{"add",		1,	0,	'a' },
+		{"new",		1,	0,	'n' },
 		{0,	0,	0,	0 }
 		};
 
@@ -70,7 +78,13 @@ options_t process_options(int argc, char **argv)
 		case 'h':
 		dohelp(0);
 		break;
-		case '1':	// alter and repeat as required.
+		case 'a':	// add target_names to makefile
+		break;
+		case 'n':	// create makefile with named target.
+		if (!opts.newfile) {
+			opts.newfile = 1;
+			opts.newfilename = strdup(optarg);
+		}	// just ignore subsequent invocations of this option.
 		break;
 		case ':':
 			fprintf(stderr, "Option %s requires an argument\n",
@@ -93,4 +107,5 @@ void dohelp(int forced)
   fputs(helptext, stderr);
   exit(forced);
 } // dohelp()
+
 

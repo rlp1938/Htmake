@@ -24,9 +24,14 @@ char *optstring;
 char *helptext;
 char* synopsis;
 
+/* options are -h; --help, -n; --new and -a; --add */
+
 typedef struct options_t {	// to be initialised with required vars.
-int nothing;
-char *str;
+int newfile;
+int addto;
+int addcount;
+char *newfilename;
+char **additions;
 } options_t;
 
 void dohelp(int forced);
