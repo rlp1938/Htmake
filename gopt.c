@@ -108,4 +108,24 @@ void dohelp(int forced)
   exit(forced);
 } // dohelp()
 
-
+void addons(options_t *opts, char *optarg)
+{	/* malloc/realloc to process added target name */
+	if (opts->addcount == 0) {
+		opts->addcount = 1;
+		opts->additions = calloc(2, sizeof(char *));
+		if (!opts->additions) goto errexit;
+		opts->additions[0] = strdup(optarg);
+	} else {
+		opts->additions[opts->addcount] = strdup(optarg);
+			// was (char *)NULL
+		opts->additions = realloc(opts->additions,
+							(opts->addcount + 2) *sizeof(char *));
+		if (!opts->additions) goto errexit;
+		opts->addcount++;
+		opts->additions[opts->addcount] = (char *)NULL;
+	}
+	return;
+errexit:
+	fputs("Memory allocation failure in addons().\n", stderr);
+	exit(EXIT_FAILURE);
+} // addons()

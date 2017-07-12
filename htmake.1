@@ -1,4 +1,4 @@
-.TH "HTMAKE" 1 "2017-07-07" "Linux User's Manual"
+.TH "HTMAKE" 1 "2017-07-12" "Linux User's Manual"
 
 
 .SH NAME
@@ -12,7 +12,12 @@
 \fBhtmake\fR \-n|\-\-new html_filename
 
 .P
-\fBhtmake\fR \-a|\-\-add target_name1 target_name2 ... target_nameN
+\fBhtmake\fR \-a|\-\-add target_name1 [\-a target_name2] ...
+
+.P
+Invoke \-a repeatedly for as many added target names as required.
+
+.P
 Do not add the extension \fI.html\fR to any target names.
 
 .SH DESCRIPTION
@@ -33,6 +38,8 @@ print help information and exit.
 .TP
  \fB\-a, \-\-add\fR
 Adds the named target or targets. A \fImakefile\fR must exist else error.
+
+Repeat the option for as many added target_names as needed.
 
 .TP
  \fB\-n, \-\-new\fR

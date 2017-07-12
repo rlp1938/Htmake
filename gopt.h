@@ -36,5 +36,6 @@ char **additions;
 
 void dohelp(int forced);
 options_t process_options(int argc, char **argv);
+void addons(options_t *opts, char *optarg);
 
 #endif
