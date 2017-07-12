@@ -28,7 +28,6 @@ char* synopsis;
 
 typedef struct options_t {	// to be initialised with required vars.
 int newfile;
-int addto;
 int addcount;
 char *newfilename;
 char **additions;
