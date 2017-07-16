@@ -36,4 +36,4 @@
 /mkinstalldirs
 /Testdata
 /*.o
-
+/Test
