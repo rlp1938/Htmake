@@ -29,59 +29,109 @@
 #include <limits.h>
 #include <libgen.h>
 
-// delete below as needed'
+// delete below as needed.
 #include "fileops.h"
 #include "stringops.h"
 #include "gopt.h"
 
-enum typ(DIR, FIL, STR, OTHR);
-static char *validatearg(char *arg, char *text, int typ);
-
+static void writenew(char *newtarget);
+static void inserttarget(char *target);
+static char *buildmakelines(char *target);
 
 int main(int argc, char **argv)
 {
 	options_t opts = process_options(argc, argv);
+	if (opts.newfile) {
+		if (fileexists("makefile") != -1) {
+			fputs("makefile exists already,"
+			" new option not permitted.\n", stderr);
+			exit(EXIT_FAILURE);
+		}
+		writenew(opts.newfilename);
+	}
+	// Ok to initialise the makefile and and the extras in 1 hit.
 
 	// now process the non-option arguments
-	char *arg1 = validatearg(argv[1], "Source dir|file", DIR|FIL);
-	char *arg2 = validatearg(argv[1], "Dest dir|file", DIR|FIL);
-
-	free(arg1);
-	free(arg2);
 	return 0;
 }//main()
 
-char *validatearg(char *arg, char *text, int typ)
-{	/* add code as needed */
-	if (!arg) {
-		fprintf("No %s provided.\n", text);
-		exit(EXIT_FAILURE);
-	}
-	switch (typ)
-	{
-		case DIR:
-			if (direxists(arg) == -1) {
-				fprintf(stderr, "Does not existor or not a dir: %s\n",
-								arg);
-				exit(EXIT_FAILURE);
-			}
-			break;
-		case FIL:
-			if (fileexists(arg) == -1) {
-				fprintf(stderr, "Does not exist or or not a file: %s\n",
-								arg);
-				exit(EXIT_FAILURE);
-			}
-			break;
-		case STR:
-			if (strlen(arg) == 0) {
-				fprintf(stderr, "Zero length string provided.\n");
-				exit(EXIT_FAILURE);
-			}
-			break;
-		case OTHR:
-			// Custom code here
-			break;
-	} // switch(typ)
-	return dostrdup(arg);
-} // validatearg()
+void writenew(char *newtarget)
+{	/* create a makefile with a single target */
+	FILE* fpo = dofopen("makefile", "w");
+	fputs("# makefile for markdown => html\n", fpo);
+	fprintf(fpo, "html :\n");
+	fputs("# Files named *.o are not object files, they are html stubs,"
+	" but the\n# naming will cause my cleanup scripts to zap them when "
+	"run.\n\n",
+	fpo);
+	fputs("\nclean :\n\trm *.o\n", fpo);
+	dofclose(fpo);
+	sync();
+	inserttarget(newtarget);
+} // writenew()
+
+static void inserttarget(char *target)
+{	/* write the text for another target name into the makefile. */
+	const int ll = 128;
+	char line[ll];
+	fdata myfd = readfile("makefile", 4096, 1);
+	myfd.to -= 4096;	// want to keep track of the actual data only.
+	// add to dependency list at top of file.
+	char *insertpoint = myfd.from;
+	//No failure guard here because the data has been program generated.
+	insertpoint = memmem(insertpoint, myfd.to - insertpoint, "html :",
+							strlen("html :"));
+	insertpoint = memchr(insertpoint, '\n', myfd.to - insertpoint);
+	// build the target name
+	sprintf(line, " %s.html", target);
+	size_t len = strlen(line);
+	memmove(insertpoint + len, insertpoint, myfd.to - insertpoint);
+	memcpy(insertpoint, line, len);
+	myfd.to += len;
+	// the make lines for the target name.
+	char *what = buildmakelines(target);
+	len = strlen(what);
+	insertpoint = memmem(insertpoint, myfd.to - insertpoint, "clean :",
+							strlen("clean :"));
+	memmove(insertpoint + len, insertpoint, myfd.to - insertpoint);
+	memcpy(insertpoint, what, len);
+	myfd.to += len;
+	writefile("makefile", myfd.from, myfd.to, "w");
+} // inserttarget()
+
+char *buildmakelines(char *target)
+{	/* construct the make lines needed for target */
+	const int ll = 128;
+	char line[ll];
+	static char ret[4096] = {0};
+	// dependencies for target
+	sprintf(line, "%s.html : %stop.o %smid.o %sbtm.o\n",
+			target, target, target, target);
+	strcat(ret, line);
+	// make target
+	sprintf(line, "\tcat %stop.o %smid.o %sbtm.o > %s.html\n\n",
+			target, target, target, target);
+	strcat(ret, line);
+	// dependencies for header
+	sprintf(line, "%stop.o : %stop.html\n", target, target);
+	strcat(ret, line);
+	// make header
+	sprintf(line, "\tsed 's/filename/%s/' %stop.html > %stop.o\n\n",
+				target, target, target);
+	strcat(ret, line);
+	// dependencies for middle
+	sprintf(line, "%smid.o : %smid.md\n", target, target);
+	strcat(ret, line);
+	// make middle
+	sprintf(line, "\tmarkdown %smid.md > %smid.o\n\n", target,
+				target);
+	strcat(ret, line);
+	// dependencies for bottom
+	sprintf(line, "%sbtm.o : %sbtm.html\n", target, target);
+	strcat(ret, line);
+	// make middle
+	sprintf(line, "\tcp %sbtm.html %sbtm.o\n\n", target, target);
+	strcat(ret, line);
+	strcat(ret, "\n");
+	return ret;
+}
