@@ -37,6 +37,7 @@
 static void writenew(char *newtarget);
 static void inserttarget(char *target);
 static char *buildmakelines(char *target);
+static void writeadds(char **additions);
 
 int main(int argc, char **argv)
 {
@@ -50,6 +51,14 @@ int main(int argc, char **argv)
 		writenew(opts.newfilename);
 	}
 	// Ok to initialise the makefile and and the extras in 1 hit.
+	if (opts.addcount) {
+		if (fileexists("makefile") == -1) {
+			fputs("makefile does not exist,"
+			" add option not permitted.\n", stderr);
+			exit(EXIT_FAILURE);
+		}
+		writeadds(opts.additions);
+	}
 
 	// now process the non-option arguments
 	return 0;
@@ -104,6 +113,8 @@ char *buildmakelines(char *target)
 	const int ll = 128;
 	char line[ll];
 	static char ret[4096] = {0};
+	// Clean out anything left around from any prior invocations.
+	ret[0] = 0;
 	// dependencies for target
 	sprintf(line, "%s.html : %stop.o %smid.o %sbtm.o\n",
 			target, target, target, target);
@@ -134,4 +145,13 @@ char *buildmakelines(char *target)
 	strcat(ret, line);
 	strcat(ret, "\n");
 	return ret;
-}
+} // buildmakelines()
+
+void writeadds(char **additions)
+{	/* add a list of names to the make file */
+	size_t idx = 0;
+	while (additions[idx]) {
+		inserttarget(additions[idx]);
+		idx++;
+	}
+} // writeadds()

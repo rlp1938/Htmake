@@ -79,6 +79,7 @@ options_t process_options(int argc, char **argv)
 		dohelp(0);
 		break;
 		case 'a':	// add target_names to makefile
+		addons(&opts, optarg);
 		break;
 		case 'n':	// create makefile with named target.
 		if (!opts.newfile) {
