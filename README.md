@@ -1,4 +1,4 @@
-## HTMAKE - Program to generate a makefile for -markdown => html-
+## HTMAKE - Program to generate a makefile for *markdown => html*
 
 Because *markdown* properly does not wrap the html it generates the
 header details, nor provide the finishing tags for the html file it
@@ -70,3 +70,7 @@ htmake --new index
 htmake --add page1
 htmake --add page2
 ```
+
+The file produced is named *makefile*. It is an error if the makefile
+exists when using the --new option or if it does not exist when using
+the --add option.
