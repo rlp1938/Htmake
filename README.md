@@ -59,6 +59,14 @@ clean :
 
 ### How to produce this *makefile* using this program
 
+
 ```
 htmake --new index --add page1 --add page2
+
+### Alternatively
+
+```
+htmake --new index
+htmake --add page1
+htmake --add page2
 
