@@ -1,4 +1,4 @@
-## HTMAKE - Program to generate a makefile for +markdown => html+
+## HTMAKE - Program to generate a makefile for -markdown => html-
 
 Because *markdown* properly does not wrap the html it generates the
 header details, nor provide the finishing tags for the html file it
