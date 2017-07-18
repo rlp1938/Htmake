@@ -1,11 +1,11 @@
 ## HTMAKE - Program to generate a makefile for *markdown => html*
 
-Because *markdown* properly does not wrap the html it generates the
-header details, nor provide the finishing tags for the html file it
-seems logical to provide a *makefile* to complete the generation of
-the complete html file or files.
+Because *markdown* properly does not wrap the html it generates with
+either header details or the ending tags to make a complete html file,
+it seems logical to provide a *makefile* to complete the generation of
+these files.
 
-### Example html file produced by this program
+### Example *makefile* file produced by this program.
 
 ```
 # makefile for markdown => html
